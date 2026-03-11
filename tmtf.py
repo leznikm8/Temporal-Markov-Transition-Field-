@@ -96,9 +96,10 @@ def local_transition_matrix(b_chunk: np.ndarray, Q: int) -> np.ndarray:
         W[from_state, to_state] += 1
 
     # Normalise each row; unvisited rows → uniform distribution
-    row_totals = W.sum(axis=1, keepdims=True)
-    zero_rows  = (row_totals == 0).flatten()
-    W = np.where(row_totals > 0, W / row_totals, 1.0 / Q)
+    row_totals  = W.sum(axis=1, keepdims=True)
+    zero_rows   = (row_totals.flatten() == 0)
+    safe_totals = np.where(row_totals > 0, row_totals, 1.0)
+    W = np.where(row_totals > 0, W / safe_totals, 1.0 / Q)
     if zero_rows.any():
         print(f"  Warning: {zero_rows.sum()} state(s) had no outgoing transitions "
               f"in this chunk → set to uniform ({1/Q:.3f}).")
